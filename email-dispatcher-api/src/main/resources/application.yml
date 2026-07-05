@@ -3,12 +3,30 @@ spring:
     name: email-dispatcher-api
   profiles:
     active: local
+spring:
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${SPRING_RABBITMQ_HOST}
+    port: ${SPRING_RABBITMQ_PORT}
+    username: ${SPRING_RABBITMQ_USERNAME}
+    password: ${SPRING_RABBITMQ_PASSWORD}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
+crm:
+  ploomes:
+    name: ${CRM_PLOOMES_NAME}
+    url: ${CRM_PLOOMES_URL}
+    token: ${CRM_PLOOMES_TOKEN}
+
+logging:
+  level:
+    com.infnet.emaildispatcher.adapter.out.http.crm.ploomes: DEBUG
 rabbitmq:
   exchange: email-exchange
   queue:
