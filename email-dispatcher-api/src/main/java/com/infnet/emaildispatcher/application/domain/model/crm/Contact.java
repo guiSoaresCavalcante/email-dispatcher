@@ -4,7 +4,7 @@ public record Contact(
         Integer id,
         String name,
         String legalName,
-        String infoNotes,
+        String informationNote,
         String email
 ) {
 }
