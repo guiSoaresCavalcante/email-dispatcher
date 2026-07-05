@@ -3,7 +3,6 @@ spring:
     name: email-dispatcher-api
   profiles:
     active: local
-spring:
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST}
     port: ${SPRING_RABBITMQ_PORT}
@@ -19,6 +18,7 @@ spring:
       mail.smtp.starttls.enable: true
 
 crm:
+  provider: ${CRM_PROVIDER}
   ploomes:
     name: ${CRM_PLOOMES_NAME}
     url: ${CRM_PLOOMES_URL}

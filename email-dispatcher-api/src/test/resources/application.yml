@@ -20,6 +20,7 @@ rabbitmq:
     email-generation: email.generation
 
 crm:
+  provider: PLOOMES
   ploomes:
     name: ploomes
     url: https://public-api2.ploomes.com
