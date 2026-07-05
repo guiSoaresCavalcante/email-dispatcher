@@ -1,6 +1,11 @@
 spring:
   application:
     name: email-dispatcher-api
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
   rabbitmq:
     host: localhost
     port: 5672

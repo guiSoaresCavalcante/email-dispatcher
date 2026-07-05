@@ -5,6 +5,7 @@ import com.infnet.emaildispatcher.application.port.in.email.IEmailUseCase;
 import com.infnet.emaildispatcher.application.port.out.crm.CrmProviderType;
 import com.infnet.emaildispatcher.application.port.out.crm.ICrmProviderFactory;
 import com.infnet.emaildispatcher.application.port.out.email.IEmailGenerationPublisher;
+import com.infnet.emaildispatcher.application.port.out.email.IEmailSender;
 import com.infnet.emaildispatcher.application.usecase.CrmUseCase;
 import com.infnet.emaildispatcher.application.usecase.EmailUseCase;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +20,7 @@ public class UseCaseBeanConfig {
     }
 
     @Bean
-    public IEmailUseCase emailUseCase(IEmailGenerationPublisher emailGenerationPublisher) {
-        return new EmailUseCase(emailGenerationPublisher);
+    public IEmailUseCase emailUseCase(IEmailGenerationPublisher emailGenerationPublisher, IEmailSender emailSender) {
+        return new EmailUseCase(emailGenerationPublisher, emailSender);
     }
 }
