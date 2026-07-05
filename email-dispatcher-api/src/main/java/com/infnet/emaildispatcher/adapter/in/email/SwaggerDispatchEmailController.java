@@ -18,7 +18,7 @@ public interface SwaggerDispatchEmailController {
             description = "Inicia o processo de envio de e-mail. Busca informa no CRM e publica a ação na fila"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Processo iniciado com sucesso"),
+            @ApiResponse(responseCode = "202", description = "Processo iniciado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Requisição inválida"),
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     })

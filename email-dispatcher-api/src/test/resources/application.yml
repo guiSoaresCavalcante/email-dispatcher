@@ -1,6 +1,18 @@
 spring:
   application:
     name: email-dispatcher-api
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+rabbitmq:
+  exchange: email-exchange
+  queue:
+    email-generation: email-generation-queue
+  routing-key:
+    email-generation: email.generation
 
 crm:
   ploomes:

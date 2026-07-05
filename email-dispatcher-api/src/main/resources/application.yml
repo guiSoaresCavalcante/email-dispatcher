@@ -3,3 +3,15 @@ spring:
     name: email-dispatcher-api
   profiles:
     active: local
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+rabbitmq:
+  exchange: email-exchange
+  queue:
+    email-generation: email-generation-queue
+  routing-key:
+    email-generation: email.generation
