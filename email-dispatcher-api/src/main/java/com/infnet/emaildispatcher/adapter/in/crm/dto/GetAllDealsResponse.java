@@ -4,7 +4,7 @@ import com.infnet.emaildispatcher.application.domain.model.crm.Deal;
 
 import java.util.List;
 
-public record GetAllResponse(
+public record GetAllDealsResponse(
         List<Deal> value
 ) {
 }

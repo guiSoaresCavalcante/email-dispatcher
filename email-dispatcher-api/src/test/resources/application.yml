@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: email-dispatcher-api
+
+crm:
+  ploomes:
+    name: ploomes
+    url: https://public-api2.ploomes.com
+    token: test-token

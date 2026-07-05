@@ -1,3 +1,5 @@
 spring:
   application:
     name: email-dispatcher-api
+  profiles:
+    active: local

@@ -1,7 +1,7 @@
 package com.infnet.emaildispatcher.adapter.in.crm;
 
-import com.infnet.emaildispatcher.adapter.in.crm.dto.GetAllResponse;
-import com.infnet.emaildispatcher.adapter.in.crm.dto.GetByIdResponse;
+import com.infnet.emaildispatcher.adapter.in.crm.dto.GetAllDealsResponse;
+import com.infnet.emaildispatcher.adapter.in.crm.dto.GetDealByIdResponse;
 import com.infnet.emaildispatcher.adapter.in.crm.dto.mapper.CrmMapper;
 import com.infnet.emaildispatcher.application.port.in.crm.ICrmUseCase;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +22,14 @@ public class CrmController implements SwaggerCrmController {
     }
 
     @Override
-    public ResponseEntity<GetAllResponse> getAllDeals() {
+    public ResponseEntity<GetAllDealsResponse> getAllDeals() {
         var deals = useCase.getAllDeals();
-        return null;
+        return ResponseEntity.ok(new GetAllDealsResponse(deals));
     }
 
     @Override
-    public ResponseEntity<GetByIdResponse> getDealById(Integer dealId) {
+    public ResponseEntity<GetDealByIdResponse> getDealById(Integer dealId) {
         var deal = useCase.getDealById(dealId);
-        return null;
+        return ResponseEntity.ok(new GetDealByIdResponse(deal));
     }
 }
