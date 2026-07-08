@@ -121,14 +121,8 @@ email-dispatcher/
 ├── .env
 │
 ├── infra/
-│   ├── rabbitmq/
-│   │   ├── definitions.json
-│   │   ├── rabbitmq.conf
-│   │   └── enabled_plugins
-│   │
-│   └── scripts/
-│       ├── start.sh
-│       └── wait-for.sh
+│   └── rabbitmq/
+│       └── rabbitmq.conf
 │
 ├── email-dispatcher-api/          ← Backend Java (implementado)
 │   ├── docker/Dockerfile
@@ -325,15 +319,62 @@ O `email-dispatcher-web` será a interface web do sistema, desenvolvida em React
 git clone <repo-url>
 cd email-dispatcher
 
-# Configure as variáveis de ambiente
+# Crie o arquivo .env a partir do exemplo
 cp .env.example .env
-# Edite o .env com suas credenciais
-
-# Suba todos os serviços
-docker compose up --build
 ```
 
-A API estará disponível em `http://localhost:8080`.
+Preencha as variáveis no `.env`:
+
+```dotenv
+# API
+API_PORT=8080
+SPRING_PROFILES_ACTIVE=default
+
+# RabbitMQ
+SPRING_RABBITMQ_HOST=rabbitmq
+SPRING_RABBITMQ_PORT=5672
+SPRING_RABBITMQ_USERNAME=guest
+SPRING_RABBITMQ_PASSWORD=guest
+RABBITMQ_PORT=5672
+RABBITMQ_MANAGEMENT_PORT=15672
+
+# Mail (SMTP)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=seu-email@gmail.com
+MAIL_PASSWORD=xxxx xxxx xxxx xxxx
+
+# CRM
+CRM_PROVIDER=PLOOMES
+CRM_PLOOMES_NAME=ploomes
+CRM_PLOOMES_URL=https://public-api2.ploomes.com
+CRM_PLOOMES_TOKEN=seu-token-aqui
+```
+
+Suba os serviços:
+
+```bash
+# Build e inicialização dos containers
+docker compose up --build -d
+
+# Acompanhar os logs
+docker compose logs -f
+```
+
+A API estará disponível em `http://localhost:8080` e o painel do RabbitMQ em `http://localhost:15672`.
+
+Para parar e reiniciar:
+
+```bash
+# Parar os serviços
+docker compose stop
+
+# Iniciar novamente
+docker compose start
+
+# Parar e remover os containers
+docker compose down
+```
 
 ### Rodando Manualmente (Desenvolvimento)
 

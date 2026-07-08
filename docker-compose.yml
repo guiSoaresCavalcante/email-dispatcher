@@ -1,16 +1,49 @@
 services:
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    volumes:
+      - ./infra/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=${SPRING_RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${SPRING_RABBITMQ_PASSWORD}
+
   email-dispatcher-api:
     build:
-      context: ./docker/email-dispatcher-api
-      dockerfile: Dockerfile
+      context: ./email-dispatcher-api
+      dockerfile: docker/Dockerfile
     ports:
-      - "8080:8080"
+      - "${API_PORT}:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=default
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_RABBITMQ_HOST=${SPRING_RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${SPRING_RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${SPRING_RABBITMQ_USERNAME}
+      - SPRING_RABBITMQ_PASSWORD=${SPRING_RABBITMQ_PASSWORD}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - CRM_PROVIDER=${CRM_PROVIDER}
+      - CRM_PLOOMES_NAME=${CRM_PLOOMES_NAME}
+      - CRM_PLOOMES_URL=${CRM_PLOOMES_URL}
+      - CRM_PLOOMES_TOKEN=${CRM_PLOOMES_TOKEN}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 20s
+      start_period: 30s
     restart: unless-stopped
