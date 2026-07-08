@@ -2,8 +2,10 @@ package com.infnet.emaildispatcher.adapter.out.smtp;
 
 import com.infnet.emaildispatcher.application.domain.model.email.Email;
 import com.infnet.emaildispatcher.application.port.out.email.IEmailSender;
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,10 +19,15 @@ public class SmtpEmailSender implements IEmailSender {
 
     @Override
     public void send(Email email) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email.toEmail());
-        message.setSubject(email.subject());
-        message.setText(email.body());
-        mailSender.send(message);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            helper.setTo(email.toEmail());
+            helper.setSubject(email.subject());
+            helper.setText(email.body(), true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Falha ao enviar email", e);
+        }
     }
 }
