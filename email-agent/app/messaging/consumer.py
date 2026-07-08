@@ -16,14 +16,15 @@ def process_message(
     body: bytes,
 ) -> None:
     try:
+        print("Recebendo a mensagem")
         message = json.loads(body)
         print("Mensagem recebida: %s", message)
 
         email_agent.generate_email(message)
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
-    except Exception:
-        print("Erro ao processar mensagem")
+    except Exception as e:
+        print("Erro ao processar mensagem: %s" % e)
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 
 
