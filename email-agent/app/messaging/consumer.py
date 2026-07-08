@@ -2,8 +2,11 @@ import json
 
 import pika
 
+from app.agent.email_agent import EmailAgent
 from app.core.config import RABBITMQ_QUEUE
 from app.messaging.connection import get_connection
+
+email_agent = EmailAgent()
 
 
 def process_message(
@@ -16,7 +19,7 @@ def process_message(
         message = json.loads(body)
         print("Mensagem recebida: %s", message)
 
-        # TODO: Agent de email
+        email_agent.generate_email(message)
 
         ch.basic_ack(delivery_tag=method.delivery_tag)
     except Exception:
