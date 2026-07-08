@@ -14,8 +14,8 @@ services:
       start_period: 15s
     restart: unless-stopped
     environment:
-      - RABBITMQ_DEFAULT_USER=${SPRING_RABBITMQ_USERNAME}
-      - RABBITMQ_DEFAULT_PASS=${SPRING_RABBITMQ_PASSWORD}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
 
   email-dispatcher-api:
     build:
@@ -25,10 +25,10 @@ services:
       - "${API_PORT}:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - SPRING_RABBITMQ_HOST=${SPRING_RABBITMQ_HOST}
-      - SPRING_RABBITMQ_PORT=${SPRING_RABBITMQ_PORT}
-      - SPRING_RABBITMQ_USERNAME=${SPRING_RABBITMQ_USERNAME}
-      - SPRING_RABBITMQ_PASSWORD=${SPRING_RABBITMQ_PASSWORD}
+      - SPRING_RABBITMQ_HOST=${RABBITMQ_HOST}
+      - SPRING_RABBITMQ_PORT=${RABBITMQ_PORT}
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
       - MAIL_HOST=${MAIL_HOST}
       - MAIL_PORT=${MAIL_PORT}
       - MAIL_USERNAME=${MAIL_USERNAME}
@@ -46,4 +46,26 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    restart: unless-stopped
+
+  email-agent:
+    build:
+      context: ./email-agent
+      dockerfile: Dockerfile
+    ports:
+      - "${AGENT_PORT}:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SEND_EMAIL_URL=${SEND_EMAIL_URL}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      email-dispatcher-api:
+        condition: service_healthy
     restart: unless-stopped
