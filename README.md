@@ -130,9 +130,9 @@ email-dispatcher/
 │   ├── src/
 │   └── ...
 │
-├── email-agent/                   ← Agente Python (em desenvolvimento)
+├── email-agent/                   ← Agente Python (implementado)
 │   ├── Dockerfile
-│   ├── requirements.txt
+│   ├── pyproject.toml
 │   ├── app/
 │   └── ...
 │
@@ -286,12 +286,60 @@ O sistema utiliza um `CrmProviderType` enum que suporta:
 
 ## Email Agent (Python)
 
-> ⚠️ **Em desenvolvimento**
+O `email-agent` é um microserviço Python responsável por consumir mensagens da fila RabbitMQ, gerar conteúdo de e-mail personalizado via IA e fazer o callback para a API de envio.
 
-O `email-agent` será um serviço Python responsável por:
-- Consumir mensagens da fila `email-generation-queue` do RabbitMQ
-- Gerar conteúdo personalizado de e-mail
-- Fazer callback para a API (`POST /api/v1/dispatch-email/send`) com o e-mail pronto
+### Tecnologias
+
+| Tecnologia | Versão | Uso |
+|-----------|--------|-----|
+| Python | 3.12+ | Linguagem principal |
+| FastAPI | 0.139+ | Framework web (health check) |
+| Uvicorn | 0.51+ | Servidor ASGI |
+| LangChain | 0.3+ | Orquestração de LLM |
+| LangChain OpenAI | 0.3+ | Integração com GPT-4o-mini |
+| Pika | 1.4+ | Cliente RabbitMQ (AMQP) |
+| HTTPX | 0.28+ | Cliente HTTP |
+
+### Arquitetura
+
+```mermaid
+graph LR
+    RMQ[RabbitMQ<br/>email-generation-queue] -->|Consume| Agent[Email Agent]
+    Agent -->|LangChain + OpenAI| LLM[GPT-4o-mini]
+    LLM -->|JSON response| Agent
+    Agent -->|POST /api/v1/dispatch-email/send| API[Email Dispatcher API]
+```
+
+### Estrutura
+
+```
+email-agent/
+├── Dockerfile
+├── pyproject.toml
+├── README.md
+└── app/
+    ├── __init__.py
+    ├── main.py                  ← Entrypoint FastAPI + lifespan
+    ├── agent/
+    │   └── email_agent.py       ← Geração de e-mail (LangChain + OpenAI)
+    ├── api/
+    │   └── routes.py            ← Rotas HTTP (health check)
+    ├── core/
+    │   └── config.py            ← Variáveis de ambiente
+    └── messaging/
+        ├── connection.py        ← Factory de conexão RabbitMQ
+        └── consumer.py          ← Consumer da fila
+```
+
+### Fluxo
+
+1. **Startup** — FastAPI inicia um thread daemon com o consumer RabbitMQ.
+2. **Consumo** — O consumer escuta a fila `email-generation-queue`.
+3. **Geração** — O `EmailAgent` invoca o GPT-4o-mini via LangChain, recebendo um JSON com `subject` e `body` (HTML).
+4. **Callback** — Faz um `POST` para a API com o payload `{ toEmail, subject, body }`.
+5. **ACK/NACK** — Mensagem confirmada em caso de sucesso, rejeitada sem requeue em caso de erro.
+
+> 📖 Documentação completa em [`email-agent/README.md`](email-agent/README.md)
 
 ---
 
