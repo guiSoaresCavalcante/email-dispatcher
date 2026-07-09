@@ -54,6 +54,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "${AGENT_PORT}:8000"
+    volumes:
+      - ./email-agent/app:/app/app
     environment:
       - PYTHONUNBUFFERED=1
       - RABBITMQ_HOST=${RABBITMQ_HOST}
@@ -66,6 +68,17 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      email-dispatcher-api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  email-dispatcher-web:
+    build:
+      context: ./email-dispatcher-web
+      dockerfile: Dockerfile
+    ports:
+      - "${WEB_PORT:-4200}:80"
+    depends_on:
       email-dispatcher-api:
         condition: service_healthy
     restart: unless-stopped

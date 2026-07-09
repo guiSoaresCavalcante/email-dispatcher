@@ -16,7 +16,7 @@ Projeto feito para a disciplina Clean Code e Padrões de Projeto do curso MIT em
   - [Modelos de Domínio](#modelos-de-domínio)
   - [Configurações](#configurações)
 - [Email Agent (Python)](#email-agent-python)
-- [Email Dispatcher Web (React)](#email-dispatcher-web-react)
+- [Email Dispatcher Web (Angular)](#email-dispatcher-web-angular)
 - [Como Rodar o Projeto](#como-rodar-o-projeto)
   - [Pré-requisitos](#pré-requisitos)
   - [Rodando com Docker Compose](#rodando-com-docker-compose)
@@ -35,7 +35,7 @@ O sistema é composto por três aplicações principais:
 |---------|-----------|-----------|
 | **email-dispatcher-api** | Java 21 / Spring Boot 4 | Backend REST que orquestra o fluxo de dados |
 | **email-agent** | Python | Agente que consome a fila e gera o conteúdo do e-mail |
-| **email-dispatcher-web** | React | Interface web para gerenciamento |
+| **email-dispatcher-web** | Angular 17 | Interface web para gerenciamento |
 
 ---
 
@@ -44,7 +44,7 @@ O sistema é composto por três aplicações principais:
 ```mermaid
 graph TB
     subgraph Frontend
-        WEB[Email Dispatcher Web<br/>React]
+        WEB[Email Dispatcher Web<br/>Angular]
     end
 
     subgraph Backend
@@ -136,7 +136,7 @@ email-dispatcher/
 │   ├── app/
 │   └── ...
 │
-└── email-dispatcher-web/          ← Frontend React (em desenvolvimento)
+└── email-dispatcher-web/          ← Frontend Angular
     ├── Dockerfile
     ├── package.json
     ├── src/
@@ -343,11 +343,26 @@ email-agent/
 
 ---
 
-## Email Dispatcher Web (React)
+## Email Dispatcher Web (Angular)
 
-> ⚠️ **Em desenvolvimento**
+O `email-dispatcher-web` é a interface web do sistema, desenvolvida em Angular 17 com Standalone Components.
 
-O `email-dispatcher-web` será a interface web do sistema, desenvolvida em React.
+### Funcionalidades
+
+- **Lista de Deals** — Tela principal que exibe todos os deals do CRM com barra de pesquisa
+- **Detalhe do Deal** — Formulário com dados do deal para disparo de email
+- **Disparo de Email** — Envio assíncrono via API
+
+### Tecnologias
+
+| Tecnologia | Uso |
+|-----------|-----|
+| Angular 17 | Framework frontend |
+| TypeScript | Linguagem |
+| Nginx | Servidor de produção |
+| Docker | Containerização |
+
+> 📖 Documentação completa em [`email-dispatcher-web/README.md`](email-dispatcher-web/README.md)
 
 ---
 
