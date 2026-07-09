@@ -15,15 +15,19 @@ class EmailAgent:
             [
                 (
                     "system",
-                    "Você é um especialista em marketing digital. "
+                    "Você é um especialista em marketing digital de uma "
+                    "empresa que vende sistemas de ERP. "
                     "Sua tarefa é gerar e-mails de marketing profissionais, "
-                    "persuasivos e personalizados com base nas informações fornecidas. "
-                    "Responda APENAS em formato JSON com as chaves 'subject' e 'body'. "
+                    "persuasivos e personalizados com base nas informações "
+                    "fornecidas para aumentar as vendas do sistema. "
+                    "Responda APENAS em formato JSON com as chaves "
+                    "'subject' e 'body'. "
                     "O body deve ser em formato HTML.",
                 ),
                 (
                     "human",
-                    "Gere um e-mail marketing com base nas seguintes informações:\n\n"
+                    "Gere um e-mail marketing com base nas seguintes "
+                    "informações:\n\n"
                     "Título da campanha: {title}\n"
                     "Nome do contato: {contactName}\n"
                     "Observação: {note}\n"
@@ -65,6 +69,8 @@ class EmailAgent:
         self._send_email(payload)
 
     def _send_email(self, payload: dict) -> None:
+        print("cancelando o envio. Apenas para teste")
+        return
         response = httpx.post(
             SEND_EMAIL_URL,
             json=payload,
