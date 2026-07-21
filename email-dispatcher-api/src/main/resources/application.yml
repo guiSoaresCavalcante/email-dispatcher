@@ -2,15 +2,15 @@ spring:
   application:
     name: email-dispatcher-api
   profiles:
-    active: local
+    active: ${SPRING_PROFILES_ACTIVE:local}
   rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST}
-    port: ${SPRING_RABBITMQ_PORT}
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
     username: ${SPRING_RABBITMQ_USERNAME}
     password: ${SPRING_RABBITMQ_PASSWORD}
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
@@ -18,10 +18,10 @@ spring:
       mail.smtp.starttls.enable: true
 
 crm:
-  provider: ${CRM_PROVIDER}
+  provider: ${CRM_PROVIDER:PLOOMES}
   ploomes:
-    name: ${CRM_PLOOMES_NAME}
-    url: ${CRM_PLOOMES_URL}
+    name: ${CRM_PLOOMES_NAME:ploomes}
+    url: ${CRM_PLOOMES_URL:https://public-api2.ploomes.com}
     token: ${CRM_PLOOMES_TOKEN}
 
 logging:

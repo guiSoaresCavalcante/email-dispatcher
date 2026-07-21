@@ -16,7 +16,7 @@ Projeto feito para a disciplina Clean Code e Padrões de Projeto do curso MIT em
   - [Modelos de Domínio](#modelos-de-domínio)
   - [Configurações](#configurações)
 - [Email Agent (Python)](#email-agent-python)
-- [Email Dispatcher Web (React)](#email-dispatcher-web-react)
+- [Email Dispatcher Web (Angular)](#email-dispatcher-web-angular)
 - [Como Rodar o Projeto](#como-rodar-o-projeto)
   - [Pré-requisitos](#pré-requisitos)
   - [Rodando com Docker Compose](#rodando-com-docker-compose)
@@ -35,7 +35,7 @@ O sistema é composto por três aplicações principais:
 |---------|-----------|-----------|
 | **email-dispatcher-api** | Java 21 / Spring Boot 4 | Backend REST que orquestra o fluxo de dados |
 | **email-agent** | Python | Agente que consome a fila e gera o conteúdo do e-mail |
-| **email-dispatcher-web** | React | Interface web para gerenciamento |
+| **email-dispatcher-web** | Angular 17 | Interface web para gerenciamento |
 
 ---
 
@@ -44,7 +44,7 @@ O sistema é composto por três aplicações principais:
 ```mermaid
 graph TB
     subgraph Frontend
-        WEB[Email Dispatcher Web<br/>React]
+        WEB[Email Dispatcher Web<br/>Angular]
     end
 
     subgraph Backend
@@ -121,14 +121,8 @@ email-dispatcher/
 ├── .env
 │
 ├── infra/
-│   ├── rabbitmq/
-│   │   ├── definitions.json
-│   │   ├── rabbitmq.conf
-│   │   └── enabled_plugins
-│   │
-│   └── scripts/
-│       ├── start.sh
-│       └── wait-for.sh
+│   └── rabbitmq/
+│       └── rabbitmq.conf
 │
 ├── email-dispatcher-api/          ← Backend Java (implementado)
 │   ├── docker/Dockerfile
@@ -136,13 +130,13 @@ email-dispatcher/
 │   ├── src/
 │   └── ...
 │
-├── email-agent/                   ← Agente Python (em desenvolvimento)
+├── email-agent/                   ← Agente Python (implementado)
 │   ├── Dockerfile
-│   ├── requirements.txt
+│   ├── pyproject.toml
 │   ├── app/
 │   └── ...
 │
-└── email-dispatcher-web/          ← Frontend React (em desenvolvimento)
+└── email-dispatcher-web/          ← Frontend Angular
     ├── Dockerfile
     ├── package.json
     ├── src/
@@ -292,20 +286,83 @@ O sistema utiliza um `CrmProviderType` enum que suporta:
 
 ## Email Agent (Python)
 
-> ⚠️ **Em desenvolvimento**
+O `email-agent` é um microserviço Python responsável por consumir mensagens da fila RabbitMQ, gerar conteúdo de e-mail personalizado via IA e fazer o callback para a API de envio.
 
-O `email-agent` será um serviço Python responsável por:
-- Consumir mensagens da fila `email-generation-queue` do RabbitMQ
-- Gerar conteúdo personalizado de e-mail
-- Fazer callback para a API (`POST /api/v1/dispatch-email/send`) com o e-mail pronto
+### Tecnologias
+
+| Tecnologia | Versão | Uso |
+|-----------|--------|-----|
+| Python | 3.12+ | Linguagem principal |
+| FastAPI | 0.139+ | Framework web (health check) |
+| Uvicorn | 0.51+ | Servidor ASGI |
+| LangChain | 0.3+ | Orquestração de LLM |
+| LangChain OpenAI | 0.3+ | Integração com GPT-4o-mini |
+| Pika | 1.4+ | Cliente RabbitMQ (AMQP) |
+| HTTPX | 0.28+ | Cliente HTTP |
+
+### Arquitetura
+
+```mermaid
+graph LR
+    RMQ[RabbitMQ<br/>email-generation-queue] -->|Consume| Agent[Email Agent]
+    Agent -->|LangChain + OpenAI| LLM[GPT-4o-mini]
+    LLM -->|JSON response| Agent
+    Agent -->|POST /api/v1/dispatch-email/send| API[Email Dispatcher API]
+```
+
+### Estrutura
+
+```
+email-agent/
+├── Dockerfile
+├── pyproject.toml
+├── README.md
+└── app/
+    ├── __init__.py
+    ├── main.py                  ← Entrypoint FastAPI + lifespan
+    ├── agent/
+    │   └── email_agent.py       ← Geração de e-mail (LangChain + OpenAI)
+    ├── api/
+    │   └── routes.py            ← Rotas HTTP (health check)
+    ├── core/
+    │   └── config.py            ← Variáveis de ambiente
+    └── messaging/
+        ├── connection.py        ← Factory de conexão RabbitMQ
+        └── consumer.py          ← Consumer da fila
+```
+
+### Fluxo
+
+1. **Startup** — FastAPI inicia um thread daemon com o consumer RabbitMQ.
+2. **Consumo** — O consumer escuta a fila `email-generation-queue`.
+3. **Geração** — O `EmailAgent` invoca o GPT-4o-mini via LangChain, recebendo um JSON com `subject` e `body` (HTML).
+4. **Callback** — Faz um `POST` para a API com o payload `{ toEmail, subject, body }`.
+5. **ACK/NACK** — Mensagem confirmada em caso de sucesso, rejeitada sem requeue em caso de erro.
+
+> 📖 Documentação completa em [`email-agent/README.md`](email-agent/README.md)
 
 ---
 
-## Email Dispatcher Web (React)
+## Email Dispatcher Web (Angular)
 
-> ⚠️ **Em desenvolvimento**
+O `email-dispatcher-web` é a interface web do sistema, desenvolvida em Angular 17 com Standalone Components.
 
-O `email-dispatcher-web` será a interface web do sistema, desenvolvida em React.
+### Funcionalidades
+
+- **Lista de Deals** — Tela principal que exibe todos os deals do CRM com barra de pesquisa
+- **Detalhe do Deal** — Formulário com dados do deal para disparo de email
+- **Disparo de Email** — Envio assíncrono via API
+
+### Tecnologias
+
+| Tecnologia | Uso |
+|-----------|-----|
+| Angular 17 | Framework frontend |
+| TypeScript | Linguagem |
+| Nginx | Servidor de produção |
+| Docker | Containerização |
+
+> 📖 Documentação completa em [`email-dispatcher-web/README.md`](email-dispatcher-web/README.md)
 
 ---
 
@@ -325,15 +382,62 @@ O `email-dispatcher-web` será a interface web do sistema, desenvolvida em React
 git clone <repo-url>
 cd email-dispatcher
 
-# Configure as variáveis de ambiente
+# Crie o arquivo .env a partir do exemplo
 cp .env.example .env
-# Edite o .env com suas credenciais
-
-# Suba todos os serviços
-docker compose up --build
 ```
 
-A API estará disponível em `http://localhost:8080`.
+Preencha as variáveis no `.env`:
+
+```dotenv
+# API
+API_PORT=8080
+SPRING_PROFILES_ACTIVE=default
+
+# RabbitMQ
+SPRING_RABBITMQ_HOST=rabbitmq
+SPRING_RABBITMQ_PORT=5672
+SPRING_RABBITMQ_USERNAME=guest
+SPRING_RABBITMQ_PASSWORD=guest
+RABBITMQ_PORT=5672
+RABBITMQ_MANAGEMENT_PORT=15672
+
+# Mail (SMTP)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=seu-email@gmail.com
+MAIL_PASSWORD=xxxx xxxx xxxx xxxx
+
+# CRM
+CRM_PROVIDER=PLOOMES
+CRM_PLOOMES_NAME=ploomes
+CRM_PLOOMES_URL=https://public-api2.ploomes.com
+CRM_PLOOMES_TOKEN=seu-token-aqui
+```
+
+Suba os serviços:
+
+```bash
+# Build e inicialização dos containers
+docker compose up --build -d
+
+# Acompanhar os logs
+docker compose logs -f
+```
+
+A API estará disponível em `http://localhost:8080` e o painel do RabbitMQ em `http://localhost:15672`.
+
+Para parar e reiniciar:
+
+```bash
+# Parar os serviços
+docker compose stop
+
+# Iniciar novamente
+docker compose start
+
+# Parar e remover os containers
+docker compose down
+```
 
 ### Rodando Manualmente (Desenvolvimento)
 
